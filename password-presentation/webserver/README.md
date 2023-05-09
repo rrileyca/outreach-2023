@@ -32,3 +32,16 @@ flask run --host 0.0.0.0
 
 Now open a web browser to the machine's IP address that is running the Flask server. You should see it in the console
 after you run the `flask run` command from above. For example, it might look like `http://192.168.0.100:5000`. 
+
+## Run using Docker Compose
+If you run using Docker Compose, you can connect to nginx using self-signed certs.
+
+Make the self-signed certs by running
+```shell
+create-certs.sh
+```
+
+Then start the project:
+```shell
+docker-compose up -d
+```

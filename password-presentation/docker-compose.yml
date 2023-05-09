@@ -1,6 +1,26 @@
 version: "3.9"
 services:
   web:
+    container_name: web
     build: .
     ports:
-      - "8000:5000"
+      - "8888:5000"
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - "./nginx.conf:/etc/nginx/nginx.conf:ro"
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_PORT=80
+    secrets:
+      - nginx-pem
+      - nginx-key
+
+secrets:
+  nginx-pem:
+    file: ./nginx-selfsigned.crt
+  nginx-key:
+    file: ./nginx-selfsigned.key
