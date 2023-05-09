@@ -13,6 +13,8 @@ password_list = {
 
 list_selection = 10_000
 
+slow = False
+
 print(f"Downloading {list_selection} million passwords form the dark web...")
 password_req = requests.get(password_list[list_selection])
 if password_req.status_code != 200:
@@ -40,6 +42,8 @@ def check_password(password, hash):
     # Use the hashlib module to hash the password using SHA-256 algorithm
     # The hexdigest() method returns the hash as a hexadecimal string
     password_hash = hashlib.md5(password.encode()).hexdigest()
+    if slow:
+        time.sleep(0.5)
     # Return True if the hashes match, False otherwise
     return password_hash == hash
 
@@ -72,9 +76,10 @@ def crack_password(stdscr, hash, length):
         # Clear the screen using stdscr.clear()
         stdscr.clear()
         # Print the current password and its hash being tried and the number of attempts per second at row 0 and column 0 using stdscr.addstr()
-        stdscr.addstr(0, 0, f"Trying: {password}")
-        stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
-        stdscr.addstr(2, 0, f"Attempts per second: {attempts / (time.time() - start_time):.2f}")
+        stdscr.addstr(0, 0, f"Hash we are trying to crack: {hash}")
+        stdscr.addstr(1, 0, f"Trying: {password}")
+        stdscr.addstr(2, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
+        stdscr.addstr(3, 0, f"Attempts per second: {attempts / (time.time() - start_time):.2f}")
         # Refresh the screen using stdscr.refresh()
         stdscr.refresh()
         # If the password is correct, print it and return
@@ -82,12 +87,13 @@ def crack_password(stdscr, hash, length):
             exit_key = None
             while exit_key is None:
                 stdscr.clear()
-                stdscr.addstr(0, 0, f"Password cracked: {password}")
-                stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
-                stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
-                stdscr.addstr(3, 0, f"Passwords guessed: {n} - Password was in password list!!!")
-                stdscr.addstr(4, 0, "")
-                stdscr.addstr(5, 0, "Press ENTER to exit")
+                stdscr.addstr(0, 0, f"Hash we were trying to crack: {hash}")
+                stdscr.addstr(1, 0, f"Password cracked: {password}")
+                stdscr.addstr(2, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
+                stdscr.addstr(3, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
+                stdscr.addstr(4, 0, f"Passwords guessed: {n} - Password was in password list!!!")
+                stdscr.addstr(5, 0, "")
+                stdscr.addstr(6, 0, "Press ENTER to exit")
                 exit_key = stdscr.getkey()
                 stdscr.refresh()                
             return
@@ -100,10 +106,11 @@ def crack_password(stdscr, hash, length):
         # Clear the screen using stdscr.clear()
         stdscr.clear()
         # Print the current password and its hash being tried and the number of attempts per second at row 0 and column 0 using stdscr.addstr()
-        stdscr.addstr(0, 0, f"Trying: {password}")
-        stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
-        stdscr.addstr(2, 0, f"Attempts per second: {attempts / (time.time() - start_time):.2f}")
-        stdscr.addstr(3, 0, f"Percentage complete: {round(calculate_progress(characters, length), 2)}%")
+        stdscr.addstr(0, 0, f"Hash we are trying to crack: {hash}")
+        stdscr.addstr(1, 0, f"Trying: {password}")
+        stdscr.addstr(2, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
+        stdscr.addstr(3, 0, f"Attempts per second: {attempts / (time.time() - start_time):.2f}")
+        stdscr.addstr(4, 0, f"Percentage complete: {round(calculate_progress(characters, length), 2)}%")
         # Refresh the screen using stdscr.refresh()
         stdscr.refresh()
         # If the password is correct, print it and return
@@ -111,12 +118,13 @@ def crack_password(stdscr, hash, length):
             exit_key = None
             while exit_key is None:
                 stdscr.clear()
-                stdscr.addstr(0, 0, f"Password cracked: {password}")
-                stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
-                stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
-                stdscr.addstr(3, 0, f"Passwords guessed: {n}")
-                stdscr.addstr(4, 0, "")
-                stdscr.addstr(5, 0, "Press ENTER to exit")
+                stdscr.addstr(0, 0, f"Hash we were trying to crack: {hash}")
+                stdscr.addstr(1, 0, f"Password cracked: {password}")
+                stdscr.addstr(2, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
+                stdscr.addstr(3, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
+                stdscr.addstr(4, 0, f"Passwords guessed: {n}")
+                stdscr.addstr(5, 0, "")
+                stdscr.addstr(6, 0, "Press ENTER to exit")
                 exit_key = stdscr.getkey()
                 stdscr.refresh()
             return
