@@ -6,11 +6,20 @@ import itertools
 import requests
 
 # Get the password list
-password_req = requests.get("https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/darkweb2017-top10000.txt")
+password_list = {
+    10_000: "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/darkweb2017-top10000.txt",
+    1_000_000: "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/xato-net-10-million-passwords-1000000.txt"
+}
+
+list_selection = 10_000
+
+print(f"Downloading {list_selection} million passwords form the dark web...")
+password_req = requests.get(password_list[list_selection])
 if password_req.status_code != 200:
     print("Couldn't get password list!")
     exit(1)
 
+print("Done!")
 password_list = password_req.text.split("\n")
 
 
@@ -70,17 +79,17 @@ def crack_password(stdscr, hash, length):
         stdscr.refresh()
         # If the password is correct, print it and return
         if check_password(password, hash):
-            stdscr.clear()
-            stdscr.addstr(0, 0, f"Password cracked: {password}")
-            stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
-            stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
-            stdscr.addstr(3, 0, f"Passwords guessed: {n} - Password was in password list!!!")
-            stdscr.refresh()
-            # stdscr.addstr(3, 0, f"Password cracked: {password}")
-            # stdscr.addstr(4, 0, f"Time taken: {time.time() - start_time} seconds")
-            # stdscr.refresh()
-            # Sleep forever because the screen clears when the function exits
-            time.sleep(9999)
+            exit_key = None
+            while exit_key is None:
+                stdscr.clear()
+                stdscr.addstr(0, 0, f"Password cracked: {password}")
+                stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
+                stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
+                stdscr.addstr(3, 0, f"Passwords guessed: {n} - Password was in password list!!!")
+                stdscr.addstr(4, 0, "")
+                stdscr.addstr(5, 0, "Press ENTER to exit")
+                exit_key = stdscr.getkey()
+                stdscr.refresh()                
             return
     # If none of the common passwords work, generate sequential passwords of the given length and try them
     while True:
@@ -99,20 +108,23 @@ def crack_password(stdscr, hash, length):
         stdscr.refresh()
         # If the password is correct, print it and return
         if check_password(password, hash):
-            stdscr.clear()
-            stdscr.addstr(0, 0, f"Password cracked: {password}")
-            stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
-            stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
-            stdscr.addstr(3, 0, f"Passwords guessed: {n}")
-            stdscr.refresh()
-            # Sleep forever because the screen clears when the function exits
-            time.sleep(9999)
+            exit_key = None
+            while exit_key is None:
+                stdscr.clear()
+                stdscr.addstr(0, 0, f"Password cracked: {password}")
+                stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
+                stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
+                stdscr.addstr(3, 0, f"Passwords guessed: {n}")
+                stdscr.addstr(4, 0, "")
+                stdscr.addstr(5, 0, "Press ENTER to exit")
+                exit_key = stdscr.getkey()
+                stdscr.refresh()
             return
 
 
 if __name__ == "__main__":
     # A sample password and its hash to crack
-    password = "abef"
+    password = input("Enter password to hash and crack: ")
     hash = hashlib.md5(password.encode()).hexdigest()
 
     # Initialize curses and call crack_password with a standard screen object as an argument using curses.wrapper()
