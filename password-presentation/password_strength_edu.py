@@ -3,10 +3,15 @@ import time
 import hashlib
 import curses
 import itertools
+import requests
 
-# A list of common passwords to try first
-common_passwords = ["123456", "password", "qwerty", "111111", "abc123", "iloveyou", "letmein", "monkey", "dragon",
-                    "master"]
+# Get the password list
+password_req = requests.get("https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/darkweb2017-top10000.txt")
+if password_req.status_code != 200:
+    print("Couldn't get password list!")
+    exit(1)
+
+password_list = password_req.text.split("\n")
 
 
 # A function to generate a sequential password of a given length
@@ -25,7 +30,7 @@ def generate_password(characters, length):
 def check_password(password, hash):
     # Use the hashlib module to hash the password using SHA-256 algorithm
     # The hexdigest() method returns the hash as a hexadecimal string
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    password_hash = hashlib.md5(password.encode()).hexdigest()
     # Return True if the hashes match, False otherwise
     return password_hash == hash
 
@@ -52,14 +57,14 @@ def crack_password(stdscr, hash, length):
     # Choose from lowercase letters, uppercase letters, digits and symbols
     characters = string.ascii_lowercase + string.digits  # + string.ascii_uppercase  + string.punctuation
     # Try the common passwords first
-    for password in common_passwords:
+    for password in password_list:
         # Increment the counter
         attempts += 1
         # Clear the screen using stdscr.clear()
         stdscr.clear()
         # Print the current password and its hash being tried and the number of attempts per second at row 0 and column 0 using stdscr.addstr()
         stdscr.addstr(0, 0, f"Trying: {password}")
-        stdscr.addstr(1, 0, f"Hash: {hashlib.sha256(password.encode()).hexdigest()}")
+        stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
         stdscr.addstr(2, 0, f"Attempts per second: {attempts / (time.time() - start_time):.2f}")
         # Refresh the screen using stdscr.refresh()
         stdscr.refresh()
@@ -67,9 +72,9 @@ def crack_password(stdscr, hash, length):
         if check_password(password, hash):
             stdscr.clear()
             stdscr.addstr(0, 0, f"Password cracked: {password}")
-            stdscr.addstr(1, 0, f"Hash: {hashlib.sha256(password.encode()).hexdigest()}")
+            stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
             stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
-            stdscr.addstr(3, 0, f"Passwords guessed: {n}")
+            stdscr.addstr(3, 0, f"Passwords guessed: {n} - Password was in password list!!!")
             stdscr.refresh()
             # stdscr.addstr(3, 0, f"Password cracked: {password}")
             # stdscr.addstr(4, 0, f"Time taken: {time.time() - start_time} seconds")
@@ -87,7 +92,7 @@ def crack_password(stdscr, hash, length):
         stdscr.clear()
         # Print the current password and its hash being tried and the number of attempts per second at row 0 and column 0 using stdscr.addstr()
         stdscr.addstr(0, 0, f"Trying: {password}")
-        stdscr.addstr(1, 0, f"Hash: {hashlib.sha256(password.encode()).hexdigest()}")
+        stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
         stdscr.addstr(2, 0, f"Attempts per second: {attempts / (time.time() - start_time):.2f}")
         stdscr.addstr(3, 0, f"Percentage complete: {round(calculate_progress(characters, length), 2)}%")
         # Refresh the screen using stdscr.refresh()
@@ -96,7 +101,7 @@ def crack_password(stdscr, hash, length):
         if check_password(password, hash):
             stdscr.clear()
             stdscr.addstr(0, 0, f"Password cracked: {password}")
-            stdscr.addstr(1, 0, f"Hash: {hashlib.sha256(password.encode()).hexdigest()}")
+            stdscr.addstr(1, 0, f"Hash: {hashlib.md5(password.encode()).hexdigest()}")
             stdscr.addstr(2, 0, f"Time taken: {round(time.time() - start_time, 2)} seconds")
             stdscr.addstr(3, 0, f"Passwords guessed: {n}")
             stdscr.refresh()
@@ -105,9 +110,10 @@ def crack_password(stdscr, hash, length):
             return
 
 
-# A sample password and its hash to crack
-password = "iloveyou"
-hash = hashlib.sha256(password.encode()).hexdigest()
+if __name__ == "__main__":
+    # A sample password and its hash to crack
+    password = "abef"
+    hash = hashlib.md5(password.encode()).hexdigest()
 
-# Initialize curses and call crack_password with a standard screen object as an argument using curses.wrapper()
-curses.wrapper(crack_password, hash, len(password))
+    # Initialize curses and call crack_password with a standard screen object as an argument using curses.wrapper()
+    curses.wrapper(crack_password, hash, len(password))
